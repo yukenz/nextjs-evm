@@ -1,0 +1,21 @@
+@import "tailwindcss";
+@import "tailwindcss/theme.css" layer(theme);
+@import "tailwindcss/preflight.css" layer(base);
+@import "tailwindcss/utilities.css" layer(utilities);
+
+
+@layer base {
+    /*html {*/
+    /*    color-scheme: light dark;*/
+    /*}*/
+
+    /** {*/
+    /*    @apply border-neutral-200 dark:border-gray-800;*/
+    /*}*/
+
+    /*html,*/
+    /*body {*/
+    /*    @apply text-gray-900 bg-gray-50 dark:bg-gray-950 dark:text-gray-200;*/
+    /*}*/
+
+}
