@@ -6,7 +6,7 @@ import {metaMask} from "@wagmi/connectors";
 export const wagmi = createConfig({
     chains: [localhost, mainnet, sepolia],
     transports: {
-        [localhost.id]: http(),
+        [localhost.id]: http('http://localhost:7545'),
         [mainnet.id]: http(),
         [sepolia.id]: http(),
     },
