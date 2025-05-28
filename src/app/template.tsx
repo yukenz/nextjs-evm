@@ -16,7 +16,7 @@ export default function Template({children}: { children: React.ReactNode }) {
         <WagmiProvider config={wagmiConfig}>
             <QueryClientProvider client={queryClient}>
                 <Provider store={store}>
-                    <Navbar/>
+                    {/*<Navbar/>*/}
                     <Toaster
                         position='bottom-center'
                     >
