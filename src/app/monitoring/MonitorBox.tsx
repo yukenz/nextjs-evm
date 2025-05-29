@@ -15,11 +15,14 @@ interface Instance {
 
 export default function MonitorBox({
                                        host,
-                                       reloadState
+                                       reloadState,
+                                       callbackFn
                                    }: {
     host: string;
     reloadState: boolean;
+    callbackFn: (isActive: boolean) => void
 }) {
+
 
     const initialState: Instance = {
         id: host,
@@ -40,6 +43,8 @@ export default function MonitorBox({
             setInstance(initialState);
             const newInstance = await checkIsInstance({host}) as Instance;
             setInstance(newInstance);
+
+            newInstance.status === "up" ? callbackFn(true) : callbackFn(false);
         })()
 
     }, [reloadState]);
@@ -142,4 +147,4 @@ export default function MonitorBox({
             </div>
         </div>
     )
-}
+};

@@ -1,8 +1,9 @@
 'use client'
 
-import React, {useEffect, useState} from "react"
+import React, {useCallback, useEffect, useState} from "react"
 import {Activity, Clock, Server, Wifi, WifiOff, Zap} from "lucide-react"
 import MonitorBox from "@/app/monitoring/MonitorBox";
+import KJS from "keyboardjs";
 
 interface Instance {
     id: string
@@ -82,23 +83,54 @@ const instances = [
     "http://10.0.118.108:8888",
 ]
 
+const activeMetricInitState = {
+    online: 0,
+    offline: 0,
+};
 
 export default function Page() {
     const [currentTime, setCurrentTime] = useState(new Date())
+    const [lastUpdate, setLastUpdate] = useState(new Date())
     const [refreshRate, setRefreshRate] = useState('10s')
     const [triggerRender, setTriggerRender] = useState(false)
+    const [activeMetric, setActiveMetric] = useState(activeMetricInitState)
+
+    const updateActiveMetric = (isActive: boolean) => {
+        isActive ?
+            setActiveMetric(prevState => {
+                return {...prevState, online: prevState.online + 1}
+            }) :
+            setActiveMetric(prevState => {
+                return {...prevState, offline: prevState.offline + 1}
+            })
+    };
 
 
     useEffect(() => {
 
-        /* Scheduler currentTime */
-        const timer = setInterval(() => {
+        const reRenderHandler = () => {
+            setLastUpdate(new Date())
+            setTriggerRender(!triggerRender);
+        };
+
+        /* Current Time */
+        const currentTimeEffect = setInterval(() => {
             setCurrentTime(new Date())
         }, 1000)
 
+        /* Scheduler */
+        const scheduler = setInterval(reRenderHandler, 10000)
+
+        /* Manual Reload Register */
+        KJS.bind('r', reRenderHandler);
+
         /* Timer clear when umount */
         return () => {
-            clearInterval(timer)
+            clearInterval(currentTimeEffect)
+            clearInterval(scheduler)
+            KJS.unbind('r', reRenderHandler);
+
+            setActiveMetric(activeMetricInitState)
         }
 
     }, [triggerRender])
@@ -129,11 +161,6 @@ export default function Page() {
         }
     }
 
-    const upInstances = mockInstances1.filter((i) => i.status === "up").length
-    const downInstances = mockInstances1.filter((i) => i.status === "down").length
-    const warningInstances = mockInstances1.filter((i) => i.status === "warning").length
-
-
     function Header() {
         return (
             <div className="border border-green-400 p-4 mb-6 bg-black/50">
@@ -143,7 +170,8 @@ export default function Page() {
                     </div>
                     <div className="text-right">
                         <div className="text-sm opacity-80">CURRENT TIME</div>
-                        <div className="text-lg font-bold tracking-wider" suppressHydrationWarning={true}>{currentTime.toLocaleTimeString()}</div>
+                        <div className="text-lg font-bold tracking-wider"
+                             suppressHydrationWarning={true}>{currentTime.toLocaleTimeString()}</div>
                     </div>
                 </div>
 
@@ -153,9 +181,9 @@ export default function Page() {
                         <span>MONITORING ACTIVE</span>
                     </div>
                     <div className="flex items-center gap-6">
-                        <span className="text-green-400">● ONLINE: {upInstances}</span>
-                        <span className="text-red-400">● OFFLINE: {downInstances}</span>
-                        <span className="text-yellow-400">● WARNING: {warningInstances}</span>
+                        <span className="text-green-400">● ONLINE: {activeMetric.online}</span>
+                        <span className="text-red-400">● OFFLINE: {activeMetric.offline}</span>
+                        {/*<span className="text-yellow-400">● WARNING: {warningInstances}</span>*/}
                     </div>
                 </div>
             </div>
@@ -254,7 +282,8 @@ export default function Page() {
                     </div>
                     <div className="flex items-center gap-2">
                         <Clock className="w-3 h-3"/>
-                        <span className="opacity-80" suppressHydrationWarning={true}>LAST UPDATE: {currentTime.toLocaleString()}</span>
+                        <span className="opacity-80"
+                              suppressHydrationWarning={true}>LAST UPDATE: {lastUpdate.toLocaleString()}</span>
                     </div>
                 </div>
             </div>
@@ -282,18 +311,19 @@ export default function Page() {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {
                         instances
-                            .map((instance) => <MonitorBox key={instance} reloadState={triggerRender} host={instance}/>)
+                            .map((instance) => <MonitorBox
+                                key={instance}
+                                reloadState={triggerRender}
+                                host={instance}
+                                callbackFn={updateActiveMetric}
+                            />)
                     }
                 </div>
 
                 {/* Footer */}
                 <Footer/>
                 <FooterTerminal/>
-                <button onClick={() => {
-                    setTriggerRender(!triggerRender);
-                }}>Re Render
-                </button>
-
+                <p>{triggerRender}</p>
             </div>
         </div>
     )
