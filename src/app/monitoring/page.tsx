@@ -1,8 +1,7 @@
-"use client"
+'use client'
 
-import React, {useState, useEffect} from "react"
-import {Activity, Server, Wifi, WifiOff, Zap, Clock} from "lucide-react"
-import {checkIsInstance} from "@/backend/uptimechecker";
+import React, {useEffect, useState} from "react"
+import {Activity, Clock, Server, Wifi, WifiOff, Zap} from "lucide-react"
 import MonitorBox from "@/app/monitoring/MonitorBox";
 
 interface Instance {
@@ -83,10 +82,10 @@ const instances = [
     "http://10.0.118.108:8888",
 ]
 
-export default function Component() {
+
+export default function Page() {
     const [currentTime, setCurrentTime] = useState(new Date())
     const [refreshRate, setRefreshRate] = useState('10s')
-
     const [triggerRender, setTriggerRender] = useState(false)
 
 
@@ -144,7 +143,7 @@ export default function Component() {
                     </div>
                     <div className="text-right">
                         <div className="text-sm opacity-80">CURRENT TIME</div>
-                        <div className="text-lg font-bold tracking-wider">{currentTime.toLocaleTimeString()}</div>
+                        <div className="text-lg font-bold tracking-wider" suppressHydrationWarning={true}>{currentTime.toLocaleTimeString()}</div>
                     </div>
                 </div>
 
@@ -255,7 +254,7 @@ export default function Component() {
                     </div>
                     <div className="flex items-center gap-2">
                         <Clock className="w-3 h-3"/>
-                        <span className="opacity-80">LAST UPDATE: {currentTime.toLocaleString()}</span>
+                        <span className="opacity-80" suppressHydrationWarning={true}>LAST UPDATE: {currentTime.toLocaleString()}</span>
                     </div>
                 </div>
             </div>
@@ -290,7 +289,7 @@ export default function Component() {
                 {/* Footer */}
                 <Footer/>
                 <FooterTerminal/>
-                <button onClick={event => {
+                <button onClick={() => {
                     setTriggerRender(!triggerRender);
                 }}>Re Render
                 </button>
